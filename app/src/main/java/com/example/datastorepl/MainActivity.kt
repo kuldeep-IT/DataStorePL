@@ -8,8 +8,10 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.lifecycleScope
 import com.example.datastorepl.databinding.ActivityMainBinding
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,10 +24,27 @@ class MainActivity : AppCompatActivity() {
 
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        mainBinding.save.setOnClickListener{
-            mainBinding.edtKeyRead.text.toString()
+        mainBinding.save.setOnClickListener {
+            lifecycleScope.launch {
+                saveData(
+                    mainBinding.edtKeySave1.text.toString(),
+                    mainBinding.edtValueSave1.text.toString()
+                )
+            }
         }
 
+
+        mainBinding.read.setOnClickListener {
+            lifecycleScope.launch {
+                val result = readData(
+                    mainBinding.edtKeyRead1.text.toString()
+                )
+                mainBinding.tvResult.text = result ?: "Not found"
+            }
+
+
+
+        }
 
 //        setContentView(R.layout.activity_main)
 
@@ -33,7 +52,7 @@ class MainActivity : AppCompatActivity() {
 
 
     //Save shared preference
-    private suspend fun saveData(key: String, value: String?){
+    private suspend fun saveData(key: String, value: String?) {
         val dataStoreKey = stringPreferencesKey(key)
 
         dataStore.edit {
@@ -44,7 +63,7 @@ class MainActivity : AppCompatActivity() {
 
 
     //Read shared preference
-    private suspend fun readData(key: String): String?{
+    private suspend fun readData(key: String): String? {
         val dataStoreKey = stringPreferencesKey(key)
 
         val preferences = dataStore.data.first()
