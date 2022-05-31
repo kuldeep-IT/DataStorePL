@@ -10,6 +10,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.lifecycleScope
 import com.example.datastorepl.databinding.ActivityMainBinding
+import com.example.datastorepl.utils.DataStoreManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -19,14 +22,22 @@ class MainActivity : AppCompatActivity() {
 
     val dataStore: DataStore<Preferences> by preferencesDataStore(name = "DATA_STORE")
 
+    private lateinit var dataStoreManager: DataStoreManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        dataStoreManager = DataStoreManager(this)
 
         mainBinding.save.setOnClickListener {
-            lifecycleScope.launch {
-                saveData(
+            CoroutineScope(Dispatchers.IO).launch {
+               /* saveData(
+                    mainBinding.edtKeySave1.text.toString(),
+                    mainBinding.edtValueSave1.text.toString()
+                )*/
+
+                dataStoreManager.saveDataString(
                     mainBinding.edtKeySave1.text.toString(),
                     mainBinding.edtValueSave1.text.toString()
                 )
@@ -35,19 +46,21 @@ class MainActivity : AppCompatActivity() {
 
 
         mainBinding.read.setOnClickListener {
-            lifecycleScope.launch {
+           /* lifecycleScope.launch {
                 val result = readData(
                     mainBinding.edtKeyRead1.text.toString()
                 )
                 mainBinding.tvResult.text = result ?: "Not found"
+            }*/
+
+            CoroutineScope(Dispatchers.Main).launch {
+              val result = dataStoreManager.getDataStore(
+                  mainBinding.edtKeyRead1.text.toString()
+              )
+                mainBinding.tvResult.text = result
             }
 
-
-
         }
-
-//        setContentView(R.layout.activity_main)
-
     }
 
 
